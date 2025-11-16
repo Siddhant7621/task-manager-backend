@@ -10,9 +10,24 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 4000;
+// set CLIENT_URL from env; in production it should be https://your-frontend.vercel.app
 const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:3000";
 
-app.use(cors({ origin: CLIENT_URL, credentials: true }));
+/**
+ * IMPORTANT:
+ * If behind a proxy (Railway), enable trust proxy so secure cookies are set.
+ */
+app.set("trust proxy", 1);
+
+app.use(
+  cors({
+    origin: Array.isArray(process.env.CLIENT_URLS)
+      ? process.env.CLIENT_URLS.split(",").map(s => s.trim())
+      : [CLIENT_URL],
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 app.use(cookieParser());
 
